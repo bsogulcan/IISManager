@@ -40,7 +40,7 @@ namespace IISManager.Controllers
         }
 
         [Microsoft.AspNetCore.Mvc.HttpGet("Get/{id}")]
-        public Site GetAll(long id)
+        public Site Get(long id)
         {
             using var serverMgr = new ServerManager();
             var iisSite = serverMgr.Sites.FirstOrDefault(x => x.Id == id);
@@ -62,6 +62,33 @@ namespace IISManager.Controllers
 
             var site = _siteManager.Create(createSiteInput);
             return site;
+        }
+
+        [Microsoft.AspNetCore.Mvc.HttpPost("Update")]
+        public Site UpdateFormData([FromForm] long id, [FromForm] string name, [FromForm] string bindingInformation)
+        {
+            var updateSiteInput = new UpdateSiteInput()
+            {
+                Id = id,
+                Name = name,
+                bindingInformation = bindingInformation
+            };
+
+            var updateResult = _siteManager.Update(updateSiteInput);
+            return updateResult;
+        }
+
+        [Microsoft.AspNetCore.Mvc.HttpPost("Deploy")]
+        public Site Deploy([FromForm] long id, [FromForm] IFormFile file)
+        {
+            var updateSiteInput = new DeploySiteInput()
+            {
+                Id = id,
+                File = file
+            };
+
+            var updateResult = _siteManager.Deploy(updateSiteInput);
+            return updateResult;
         }
     }
 }

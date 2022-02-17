@@ -13,6 +13,7 @@ namespace IISManager.Managers.SiteManagers
     {
         private readonly IFileManager _fileManager;
         private const string _publishesFilePath = @"C:\inetpub\wwwroot\IISManager_Publishes";
+        private const string _backUpFilePath = @"C:\inetpub\wwwroot\IISManager_Backups";
 
         public SiteManager(IFileManager fileManager)
         {
@@ -56,6 +57,69 @@ namespace IISManager.Managers.SiteManagers
 
                 serverMgr.CommitChanges();
                 return newSite;
+            }
+        }
+
+        public Site Update(UpdateSiteInput input)
+        {
+            try
+            {
+                using (var serverMgr = new ServerManager())
+                {
+                    var site = serverMgr.Sites.FirstOrDefault(x => x.Id == input.Id);
+                    if (site == null)
+                    {
+                        throw new Exception("Site not found! Id:" + input.Id);
+                    }
+
+                    site.Name = input.Name;
+                    site.Bindings.First().BindingInformation = input.bindingInformation;
+                    serverMgr.CommitChanges();
+
+                    return new Site(site);
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
+        public Site Deploy(DeploySiteInput input)
+        {
+            try
+            {
+                using (var serverMgr = new ServerManager())
+                {
+                    var site = serverMgr.Sites.FirstOrDefault(x => x.Id == input.Id);
+                    if (site == null)
+                    {
+                        throw new Exception("Site not found! Id:" + input.Id);
+                    }
+
+                    var sitePath = site.Applications.First().VirtualDirectories.First().PhysicalPath;
+                    var publishFile = _fileManager.UploadFileAndGetFullPath(_publishesFilePath, input.File);
+                    var backUpFile = Path.Combine(_backUpFilePath,
+                        DateTime.Now.ToString("yyyymmddMMss") + '-' + site.Name);
+
+                    if (!_fileManager.CheckFolderExist(_backUpFilePath))
+                    {
+                        _fileManager.CreateFolder(_backUpFilePath);
+                    }
+
+                    ZipFile.CreateFromDirectory(sitePath, backUpFile);
+
+                    site.Stop();
+                    serverMgr.CommitChanges();
+                    ZipFile.ExtractToDirectory(publishFile, sitePath, overwriteFiles: true);
+                    site.Start();
+
+                    return new Site(site);
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
             }
         }
     }
