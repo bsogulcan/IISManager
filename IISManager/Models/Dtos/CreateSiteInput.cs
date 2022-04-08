@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Security.AccessControl;
+using Microsoft.AspNetCore.Http;
 
 namespace IISManager.Models.Dtos
 {
@@ -8,5 +9,6 @@ namespace IISManager.Models.Dtos
         public int Port { get; set; }
         public string Path { get; set; }
         public IFormFile File { get; set; }
+        public string BindingInformation { get; set; }
     }
 }

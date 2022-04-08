@@ -8,5 +8,7 @@ namespace IISManager.Managers.SiteManagers
         public Site Create(CreateSiteInput input);
         public Site Update(UpdateSiteInput input);
         public Site Deploy(DeploySiteInput input);
+        public Site Stop(StopSiteInput input);
+        public Site Start(StartSiteInput input);
     }
 }

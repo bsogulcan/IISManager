@@ -6,6 +6,7 @@ using IISManager.Models.Dtos;
 using Microsoft.Web.Administration;
 using Site = IISManager.Models.Site;
 using System.IO.Compression;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace IISManager.Managers.SiteManagers
 {
@@ -40,7 +41,7 @@ namespace IISManager.Managers.SiteManagers
                 {
                     Name = input.Name,
                     Port = input.Port,
-                    Path = sitePath
+                    Path = sitePath,
                 };
 
                 var publishFile = _fileManager.UploadFileAndGetFullPath(_publishesFilePath, input.File);
@@ -54,6 +55,9 @@ namespace IISManager.Managers.SiteManagers
 
                 var iisSite = serverMgr.Sites.Add(newSite.Name, newSite.Path, newSite.Port);
                 iisSite.ApplicationDefaults.ApplicationPoolName = iisSite.Name;
+                iisSite.Bindings.First().BindingInformation = string.IsNullOrEmpty(input.BindingInformation)
+                    ? "*:" + input.Port + ":"
+                    : input.BindingInformation + ":" + input.Port + ":";
 
                 serverMgr.CommitChanges();
                 return newSite;
@@ -97,6 +101,11 @@ namespace IISManager.Managers.SiteManagers
                         throw new Exception("Site not found! Id:" + input.Id);
                     }
 
+                    if (site.State == ObjectState.Started)
+                    {
+                        throw new Exception("Current State is Started. Cannot deploy started sites, please stop it first!");
+                    }
+
                     var sitePath = site.Applications.First().VirtualDirectories.First().PhysicalPath;
                     var publishFile = _fileManager.UploadFileAndGetFullPath(_publishesFilePath, input.File);
                     var backUpFile = Path.Combine(_backUpFilePath,
@@ -108,11 +117,12 @@ namespace IISManager.Managers.SiteManagers
                     }
 
                     ZipFile.CreateFromDirectory(sitePath, backUpFile);
+                    SetAttributesNormal(new DirectoryInfo(sitePath));
 
-                    site.Stop();
-                    serverMgr.CommitChanges();
+                    Directory.Delete(sitePath, true);
+
                     ZipFile.ExtractToDirectory(publishFile, sitePath, overwriteFiles: true);
-                    site.Start();
+                    serverMgr.CommitChanges();
 
                     return new Site(site);
                 }
@@ -120,6 +130,68 @@ namespace IISManager.Managers.SiteManagers
             catch (Exception e)
             {
                 throw e;
+            }
+        }
+
+        public Site Stop(StopSiteInput input)
+        {
+            try
+            {
+                using (var serverMgr = new ServerManager())
+                {
+                    var site = serverMgr.Sites.FirstOrDefault(x => x.Id == input.Id);
+                    if (site == null)
+                    {
+                        throw new Exception("Site not found! Id:" + input.Id);
+                    }
+
+                    site.Stop();
+                    serverMgr.CommitChanges();
+
+                    return new Site(site);
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
+        public Site Start(StartSiteInput input)
+        {
+            try
+            {
+                using (var serverMgr = new ServerManager())
+                {
+                    var site = serverMgr.Sites.FirstOrDefault(x => x.Id == input.Id);
+                    if (site == null)
+                    {
+                        throw new Exception("Site not found! Id:" + input.Id);
+                    }
+
+                    site.Start();
+                    serverMgr.CommitChanges();
+
+                    return new Site(site);
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
+        private void SetAttributesNormal(DirectoryInfo dir)
+        {
+            foreach (var subDir in dir.GetDirectories())
+            {
+                SetAttributesNormal(subDir);
+                subDir.Attributes = FileAttributes.Normal;
+            }
+
+            foreach (var file in dir.GetFiles())
+            {
+                file.Attributes = FileAttributes.Normal;
             }
         }
     }
