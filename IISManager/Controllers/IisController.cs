@@ -36,7 +36,8 @@ namespace IISManager.Controllers
                     .Select(site =>
                         new Site(site.Id, site.Name,
                             site.Applications.First().VirtualDirectories.First().PhysicalPath,
-                            site.Bindings.First().BindingInformation, site.State))
+                            site.Bindings.First().BindingInformation
+                                .Substring(0, site.Bindings.First().BindingInformation.Length - 1), site.State))
                     .ToList();
 
                 response.Result = sites;

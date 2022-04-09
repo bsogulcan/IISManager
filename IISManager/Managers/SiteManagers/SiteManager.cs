@@ -23,44 +23,56 @@ namespace IISManager.Managers.SiteManagers
 
         public Site Create(CreateSiteInput input)
         {
-            using (var serverMgr = new ServerManager())
+            try
             {
-                var sites = serverMgr.Sites;
-
-                if (sites.Any(x => x.Name.ToLower() == input.Name.ToLower()))
-                    throw new Exception("Site existing with Name:" + input.Name);
-
-                var appPools = serverMgr.ApplicationPools;
-                if (!appPools.Any(x => x.Name.ToLower() == input.Name.ToLower()))
+                using (var serverMgr = new ServerManager())
                 {
-                    serverMgr.ApplicationPools.Add(input.Name);
+                    var sites = serverMgr.Sites;
+
+                    if (sites.Any(x => x.Name.ToLower() == input.Name.ToLower()))
+                        throw new Exception("Site existing with Name:" + input.Name);
+
+                    var appPools = serverMgr.ApplicationPools;
+                    if (!appPools.Any(x => x.Name.ToLower() == input.Name.ToLower()))
+                    {
+                        serverMgr.ApplicationPools.Add(input.Name);
+                    }
+
+                    string sitePath = Path.Combine("C:", "inetpub", "wwwroot", input.Name);
+                    var newSite = new Site()
+                    {
+                        Name = input.Name,
+                        Port = input.Port,
+                        Path = sitePath,
+                    };
+
+                    var publishFile = _fileManager.UploadFileAndGetFullPath(_publishesFilePath, input.File);
+
+                    if (!_fileManager.CheckFolderExist(newSite.Path))
+                    {
+                        _fileManager.CreateFolder(newSite.Path);
+                    }
+
+                    ZipFile.ExtractToDirectory(publishFile, newSite.Path);
+
+                    var iisSite = serverMgr.Sites.Add(newSite.Name, newSite.Path, newSite.Port);
+                    iisSite.ApplicationDefaults.ApplicationPoolName = iisSite.Name;
+                    iisSite.Bindings.First().BindingInformation = string.IsNullOrEmpty(input.BindingInformation)
+                        ? "*:" + input.Port + ":"
+                        : input.BindingInformation + ":" + input.Port + ":";
+
+                    serverMgr.CommitChanges();
+                    newSite.Id = iisSite.Id;
+                    newSite.Url = iisSite.Bindings.First().BindingInformation
+                        .Substring(0, iisSite.Bindings.First().BindingInformation.Length - 1);
+                    newSite.State = SiteObjectStateConverter.GetString(iisSite.State);
+                    return newSite;
                 }
-
-                string sitePath = Path.Combine("C:", "inetpub", "wwwroot", input.Name);
-                var newSite = new Site()
-                {
-                    Name = input.Name,
-                    Port = input.Port,
-                    Path = sitePath,
-                };
-
-                var publishFile = _fileManager.UploadFileAndGetFullPath(_publishesFilePath, input.File);
-
-                if (!_fileManager.CheckFolderExist(newSite.Path))
-                {
-                    _fileManager.CreateFolder(newSite.Path);
-                }
-
-                ZipFile.ExtractToDirectory(publishFile, newSite.Path);
-
-                var iisSite = serverMgr.Sites.Add(newSite.Name, newSite.Path, newSite.Port);
-                iisSite.ApplicationDefaults.ApplicationPoolName = iisSite.Name;
-                iisSite.Bindings.First().BindingInformation = string.IsNullOrEmpty(input.BindingInformation)
-                    ? "*:" + input.Port + ":"
-                    : input.BindingInformation + ":" + input.Port + ":";
-
-                serverMgr.CommitChanges();
-                return newSite;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
             }
         }
 
@@ -103,7 +115,8 @@ namespace IISManager.Managers.SiteManagers
 
                     if (site.State == ObjectState.Started)
                     {
-                        throw new Exception("Current State is Started. Cannot deploy started sites, please stop it first!");
+                        throw new Exception(
+                            "Current State is Started. Cannot deploy started sites, please stop it first!");
                     }
 
                     var sitePath = site.Applications.First().VirtualDirectories.First().PhysicalPath;
