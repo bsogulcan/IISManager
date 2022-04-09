@@ -14,7 +14,6 @@ namespace IISManager.Managers
                 ObjectState.Stopping => "Stopping",
                 ObjectState.Stopped => "Stopped",
                 ObjectState.Unknown => "Unknown",
-                _ => throw new ArgumentOutOfRangeException(nameof(objectState), objectState, null)
             };
         }
     }

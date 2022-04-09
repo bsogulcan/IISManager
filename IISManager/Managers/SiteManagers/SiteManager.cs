@@ -62,10 +62,18 @@ namespace IISManager.Managers.SiteManagers
                         : input.BindingInformation + ":" + input.Port + ":";
 
                     serverMgr.CommitChanges();
-                    newSite.Id = iisSite.Id;
-                    newSite.Url = iisSite.Bindings.First().BindingInformation
-                        .Substring(0, iisSite.Bindings.First().BindingInformation.Length - 1);
-                    newSite.State = SiteObjectStateConverter.GetString(iisSite.State);
+                    try
+                    {
+                        newSite.Id = iisSite.Id;
+                        newSite.Url = iisSite.Bindings.First().BindingInformation
+                            .Substring(0, iisSite.Bindings.First().BindingInformation.Length - 1);
+                        newSite.State = SiteObjectStateConverter.GetString(iisSite.State);
+                    }
+                    catch (Exception e)
+                    {
+                        // ignored
+                    }
+
                     return newSite;
                 }
             }
