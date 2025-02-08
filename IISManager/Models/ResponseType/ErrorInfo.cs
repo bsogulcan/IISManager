@@ -1,15 +1,12 @@
-﻿using System;
+﻿namespace IISManager.Models.ResponseType;
 
-namespace IISManager.Models.ResponseType
+public class ErrorInfo
 {
-    public class ErrorInfo
+    public ErrorInfo(Exception exception)
     {
-        public ErrorInfo(Exception exception)
-        {
-            this.Message = exception.Message;
-        }
-
-        public int ErrorCode { get; set; }
-        public string Message { get; set; }
+        Message = exception.Message;
     }
+
+    public int ErrorCode { get; set; }
+    public string Message { get; set; }
 }

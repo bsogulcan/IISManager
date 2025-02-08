@@ -1,193 +1,176 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Threading;
-using System.Web.Http;
-using IISManager.Managers.SiteManagers;
+﻿using IISManager.Managers.SiteManagers;
 using IISManager.Models.Dtos;
 using IISManager.Models.ResponseType;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Web.Administration;
 using Site = IISManager.Models.Site;
 
-namespace IISManager.Controllers
+namespace IISManager.Controllers;
+
+[ApiController]
+[Route("iis")]
+public class IisController(ISiteManager siteManager) : ControllerBase
 {
-    [ApiController]
-    [Microsoft.AspNetCore.Mvc.Route("[controller]")]
-    public class IisController : ControllerBase
+    [HttpGet]
+    public ResponseType<List<Site>> GetAllSitesAsync()
     {
-        private readonly ISiteManager _siteManager;
+        var response = new ResponseType<List<Site>>();
 
-        public IisController(ISiteManager siteManager)
+        try
         {
-            _siteManager = siteManager;
+            using var serverMgr = new ServerManager();
+            var sites = serverMgr.Sites
+                .Select(site =>
+                    new Site(site.Id, site.Name,
+                        site.Applications.First().VirtualDirectories.First().PhysicalPath,
+                        site.Bindings.First().BindingInformation
+                            .Substring(0, site.Bindings.First().BindingInformation.Length - 1), site.State))
+                .ToList();
+
+            response.Result = sites;
+            return response;
         }
-
-        [Microsoft.AspNetCore.Mvc.Route("GetAll")]
-        public ResponseType<List<Site>> GetSitesAsync()
+        catch (Exception e)
         {
-            var response = new ResponseType<List<Site>>();
-
-            try
-            {
-                using var serverMgr = new ServerManager();
-                var sites = serverMgr.Sites
-                    .Select(site =>
-                        new Site(site.Id, site.Name,
-                            site.Applications.First().VirtualDirectories.First().PhysicalPath,
-                            site.Bindings.First().BindingInformation
-                                .Substring(0, site.Bindings.First().BindingInformation.Length - 1), site.State))
-                    .ToList();
-
-                response.Result = sites;
-                return response;
-            }
-            catch (Exception e)
-            {
-                response.IsSuccess = false;
-                response.Error = new ErrorInfo(e);
-                return response;
-            }
+            response.IsSuccess = false;
+            response.Error = new ErrorInfo(e);
+            return response;
         }
+    }
 
-        [Microsoft.AspNetCore.Mvc.HttpGet("Get/{id}")]
-        public ResponseType<Site> Get(long id)
+    [HttpGet("{id}")]
+    public ResponseType<Site> GetAsync(long id)
+    {
+        var response = new ResponseType<Site>();
+        try
         {
-            var response = new ResponseType<Site>();
-            try
-            {
-                using var serverMgr = new ServerManager();
-                var iisSite = serverMgr.Sites.FirstOrDefault(x => x.Id == id);
-                if (iisSite == null) throw new Exception("Site not found! Id:" + id);
+            using var serverMgr = new ServerManager();
+            var iisSite = serverMgr.Sites.FirstOrDefault(x => x.Id == id);
+            if (iisSite == null) throw new Exception("Site not found! Id:" + id);
 
-                response.Result = new Site(iisSite);
-                return response;
-            }
-            catch (Exception e)
-            {
-                response.IsSuccess = false;
-                response.Error = new ErrorInfo(e);
-                return response;
-            }
+            response.Result = new Site(iisSite);
+            return response;
         }
-
-        [Microsoft.AspNetCore.Mvc.HttpPost("CreateFormData")]
-        public ResponseType<Site> CreateFormData([FromForm] IFormFile file, [FromForm] string name, [FromForm] int port,
-            [FromForm] string
-                bindingInformation)
+        catch (Exception e)
         {
-            var response = new ResponseType<Site>();
-
-            try
-            {
-                var createSiteInput = new CreateSiteInput()
-                {
-                    Name = name,
-                    Port = port,
-                    File = file,
-                    BindingInformation = bindingInformation
-                };
-
-                response.Result = _siteManager.Create(createSiteInput);
-                return response;
-            }
-            catch (Exception e)
-            {
-                response.IsSuccess = false;
-                response.Error = new ErrorInfo(e);
-                return response;
-            }
+            response.IsSuccess = false;
+            response.Error = new ErrorInfo(e);
+            return response;
         }
+    }
 
-        [Microsoft.AspNetCore.Mvc.HttpPost("Update")]
-        public ResponseType<Site> UpdateFormData([FromForm] long id, [FromForm] string name,
-            [FromForm] string bindingInformation)
+    [HttpPost]
+    public ResponseType<Site> CreateAsync(IFormFile file, [FromForm] string name, [FromForm] int port,
+        [FromForm] string bindingInformation)
+    {
+        var response = new ResponseType<Site>();
+
+        try
         {
-            var response = new ResponseType<Site>();
-
-            try
+            var createSiteInput = new CreateSiteInput()
             {
-                var updateSiteInput = new UpdateSiteInput()
-                {
-                    Id = id,
-                    Name = name,
-                    bindingInformation = bindingInformation
-                };
+                Name = name,
+                Port = port,
+                File = file,
+                BindingInformation = bindingInformation
+            };
 
-                response.Result = _siteManager.Update(updateSiteInput);
-                return response;
-            }
-            catch (Exception e)
-            {
-                response.IsSuccess = false;
-                response.Error = new ErrorInfo(e);
-                return response;
-            }
+            response.Result = siteManager.Create(createSiteInput);
+            return response;
         }
-
-        [Microsoft.AspNetCore.Mvc.HttpPost("Deploy")]
-        public ResponseType<Site> Deploy([FromForm] long id, [FromForm] IFormFile file)
+        catch (Exception e)
         {
-            var response = new ResponseType<Site>();
-
-            try
-            {
-                var updateSiteInput = new DeploySiteInput()
-                {
-                    Id = id,
-                    File = file
-                };
-
-                response.Result = _siteManager.Deploy(updateSiteInput);
-                return response;
-            }
-            catch (Exception e)
-            {
-                response.IsSuccess = false;
-                response.Error = new ErrorInfo(e);
-
-                return response;
-            }
+            response.IsSuccess = false;
+            response.Error = new ErrorInfo(e);
+            return response;
         }
+    }
 
-        [Microsoft.AspNetCore.Mvc.HttpPost("Stop")]
-        public ResponseType<Site> Stop(StopSiteInput input)
+    [HttpPut("{id}")]
+    public ResponseType<Site> UpdateAsync(long id, UpdateSiteDto input)
+    {
+        var response = new ResponseType<Site>();
+
+        try
         {
-            var response = new ResponseType<Site>();
-
-            try
+            var updateSiteInput = new UpdateSiteInput()
             {
-                response.Result = _siteManager.Stop(input);
-                return response;
-            }
-            catch (Exception e)
-            {
-                response.IsSuccess = false;
-                response.Error = new ErrorInfo(e);
+                Id = id,
+                Name = input.Name,
+                bindingInformation = input.BindingInformation
+            };
 
-                return response;
-            }
+            response.Result = siteManager.Update(updateSiteInput);
+            return response;
         }
-
-        [Microsoft.AspNetCore.Mvc.HttpPost("Start")]
-        public ResponseType<Site> Start(StartSiteInput input)
+        catch (Exception e)
         {
-            var response = new ResponseType<Site>();
+            response.IsSuccess = false;
+            response.Error = new ErrorInfo(e);
+            return response;
+        }
+    }
 
-            try
-            {
-                response.Result = _siteManager.Start(input);
-                return response;
-            }
-            catch (Exception e)
-            {
-                response.IsSuccess = false;
-                response.Error = new ErrorInfo(e);
+    [HttpPost("{id}/deploy")]
+    public ResponseType<Site> Deploy(long id, IFormFile file)
+    {
+        var response = new ResponseType<Site>();
 
-                return response;
-            }
+        try
+        {
+            var updateSiteInput = new DeploySiteInput()
+            {
+                Id = id,
+                File = file
+            };
+
+            response.Result = siteManager.Deploy(updateSiteInput);
+            return response;
+        }
+        catch (Exception e)
+        {
+            response.IsSuccess = false;
+            response.Error = new ErrorInfo(e);
+
+            return response;
+        }
+    }
+
+    [HttpPost("{id}/stop")]
+    public ResponseType<Site> Stop(long id)
+    {
+        var response = new ResponseType<Site>();
+
+        try
+        {
+            response.Result = siteManager.Stop(id);
+            return response;
+        }
+        catch (Exception e)
+        {
+            response.IsSuccess = false;
+            response.Error = new ErrorInfo(e);
+
+            return response;
+        }
+    }
+
+    [HttpPost("{id}")]
+    public ResponseType<Site> Start(long id)
+    {
+        var response = new ResponseType<Site>();
+
+        try
+        {
+            response.Result = siteManager.Start(id);
+            return response;
+        }
+        catch (Exception e)
+        {
+            response.IsSuccess = false;
+            response.Error = new ErrorInfo(e);
+
+            return response;
         }
     }
 }

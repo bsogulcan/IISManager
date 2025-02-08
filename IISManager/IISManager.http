@@ -1,0 +1,6 @@
+@IISManager_HostAddress = http://localhost:5261
+
+GET {{IISManager_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

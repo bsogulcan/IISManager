@@ -1,14 +1,13 @@
 ﻿using IISManager.Models;
 using IISManager.Models.Dtos;
 
-namespace IISManager.Managers.SiteManagers
+namespace IISManager.Managers.SiteManagers;
+
+public interface ISiteManager
 {
-    public interface ISiteManager
-    {
-        public Site Create(CreateSiteInput input);
-        public Site Update(UpdateSiteInput input);
-        public Site Deploy(DeploySiteInput input);
-        public Site Stop(StopSiteInput input);
-        public Site Start(StartSiteInput input);
-    }
+    public Site Create(CreateSiteInput input);
+    public Site Update(UpdateSiteInput input);
+    public Site Deploy(DeploySiteInput input);
+    public Site Stop(long id);
+    public Site Start(long id);
 }

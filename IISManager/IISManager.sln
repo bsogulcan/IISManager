@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IISManager", "IISManager.csproj", "{B43D80F5-0657-48FC-BBFE-744EFBC653BD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IISManager", "IISManager.csproj", "{6B3CB0BC-1DF9-489E-89BC-CD6CF3DD8230}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -8,9 +8,9 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B43D80F5-0657-48FC-BBFE-744EFBC653BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B43D80F5-0657-48FC-BBFE-744EFBC653BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B43D80F5-0657-48FC-BBFE-744EFBC653BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B43D80F5-0657-48FC-BBFE-744EFBC653BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B3CB0BC-1DF9-489E-89BC-CD6CF3DD8230}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B3CB0BC-1DF9-489E-89BC-CD6CF3DD8230}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B3CB0BC-1DF9-489E-89BC-CD6CF3DD8230}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B3CB0BC-1DF9-489E-89BC-CD6CF3DD8230}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

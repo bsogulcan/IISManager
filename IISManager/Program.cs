@@ -1,34 +1,25 @@
-﻿using System;
-using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
+var builder = WebApplication.CreateBuilder(args);
 
-namespace IISManager
+// Add services to the container.
+
+builder.Services.AddControllers();
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
 {
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            CreateWebHostBuilder(args).Build().Run();
-        }
-
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args)
-        {
-            var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
-            var ipAddress = config.GetSection("App:IpAddress").Value;
-            if (string.IsNullOrEmpty(ipAddress))
-            {
-                throw new Exception("Ip Address configuration not found at appsettings.json");
-            }
-
-            var port = config.GetSection("App:Port").Value;
-            if (string.IsNullOrEmpty(port))
-            {
-                throw new Exception("Port configuration not found at appsettings.json");
-            }
-
-            return WebHost.CreateDefaultBuilder(args).UseUrls(ipAddress + ":" + port)
-                .UseStartup<Startup>();
-        }
-    }
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
+
+app.UseHttpsRedirection();
+
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();

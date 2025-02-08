@@ -1,11 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿namespace IISManager.Models.Dtos;
 
-namespace IISManager.Models.Dtos
+public class UpdateSiteInput
 {
-    public class UpdateSiteInput
-    {
-        public long Id { get; set; }
-        public string Name { get; set; }
-        public string bindingInformation { get; set; }
-    }
+    public long Id { get; set; }
+    public string Name { get; set; }
+    public string bindingInformation { get; set; }
 }
