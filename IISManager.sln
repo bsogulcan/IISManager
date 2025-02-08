@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IISManager", "IISManager/II
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestWebApplication", "TestWebApplication\TestWebApplication.csproj", "{575FB666-86F8-45D2-8C86-1A3AF9BDDDFB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IISManager.Cli", "IISManager.Cli\IISManager.Cli.csproj", "{A567A311-55FA-4A7E-88AE-04CE253ACDBB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{575FB666-86F8-45D2-8C86-1A3AF9BDDDFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{575FB666-86F8-45D2-8C86-1A3AF9BDDDFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{575FB666-86F8-45D2-8C86-1A3AF9BDDDFB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A567A311-55FA-4A7E-88AE-04CE253ACDBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A567A311-55FA-4A7E-88AE-04CE253ACDBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A567A311-55FA-4A7E-88AE-04CE253ACDBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A567A311-55FA-4A7E-88AE-04CE253ACDBB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

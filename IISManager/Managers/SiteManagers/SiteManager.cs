@@ -124,7 +124,7 @@ public class SiteManager : ISiteManager
                         "Current State is Started. Cannot deploy started sites, please stop it first!");
                 }
 
-                var sitePath = site.Applications.First().VirtualDirectories.First().PhysicalPath;
+                var sitePath = Environment.ExpandEnvironmentVariables(site.Applications.First().VirtualDirectories.First().PhysicalPath);
                 var publishFile = _fileManager.UploadFileAndGetFullPath(_publishesFilePath, input.File);
                 var backUpFile = Path.Combine(_backUpFilePath,
                     DateTime.Now.ToString("yyyymmddMMss") + '-' + site.Name);

@@ -20,7 +20,8 @@ public class Site
     {
         Id = site.Id;
         Name = site.Name;
-        Path = site.Applications.First().VirtualDirectories.First().PhysicalPath;
+        Path = Environment.ExpandEnvironmentVariables(site.Applications.First().VirtualDirectories.First()
+            .PhysicalPath);
         Url = site.Bindings.First().BindingInformation;
         Port = Convert.ToInt32(Url.Substring(Url.IndexOf(":") + 1).Replace(":", ""));
         State = SiteObjectStateConverter.GetString(site.State);

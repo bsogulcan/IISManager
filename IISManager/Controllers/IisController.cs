@@ -21,10 +21,7 @@ public class IisController(ISiteManager siteManager) : ControllerBase
             using var serverMgr = new ServerManager();
             var sites = serverMgr.Sites
                 .Select(site =>
-                    new Site(site.Id, site.Name,
-                        site.Applications.First().VirtualDirectories.First().PhysicalPath,
-                        site.Bindings.First().BindingInformation
-                            .Substring(0, site.Bindings.First().BindingInformation.Length - 1), site.State))
+                    new Site(site))
                 .ToList();
 
             response.Result = sites;
@@ -155,7 +152,7 @@ public class IisController(ISiteManager siteManager) : ControllerBase
         }
     }
 
-    [HttpPost("{id}")]
+    [HttpPost("{id}/start")]
     public ResponseType<Site> Start(long id)
     {
         var response = new ResponseType<Site>();
