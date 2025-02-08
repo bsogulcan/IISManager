@@ -2,7 +2,7 @@
 
 namespace IISManager.Managers;
 
-public static class SiteObjectStateConverter
+public static class StateConverter
 {
     public static string GetString(ObjectState objectState)
     {

@@ -8,8 +8,8 @@ using Site = IISManager.Models.Site;
 namespace IISManager.Controllers;
 
 [ApiController]
-[Route("iis")]
-public class IisController(ISiteManager siteManager) : ControllerBase
+[Route("iis/site")]
+public class SiteController(ISiteManager siteManager) : ControllerBase
 {
     [HttpGet]
     public ResponseType<List<Site>> GetAllSitesAsync()

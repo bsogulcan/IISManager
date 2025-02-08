@@ -64,7 +64,7 @@ public class SiteManager : ISiteManager
                     newSite.Id = iisSite.Id;
                     newSite.Url = iisSite.Bindings.First().BindingInformation
                         .Substring(0, iisSite.Bindings.First().BindingInformation.Length - 1);
-                    newSite.State = SiteObjectStateConverter.GetString(iisSite.State);
+                    newSite.State = StateConverter.GetString(iisSite.State);
                 }
                 catch (Exception e)
                 {
