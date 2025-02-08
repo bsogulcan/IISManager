@@ -20,7 +20,7 @@ namespace IISManager.Cli.Manager
 
         public async Task<List<Site>> GetList()
         {
-            var response = await HttpManager.Request(_host + ":" + _port, "/iis", Method.Get, null);
+            var response = await HttpManager.Request(_host + ":" + _port, "/iis/site", Method.Get, null);
             if (!response.IsSuccessful) throw new Exception(response.ErrorMessage);
 
             var result = JsonSerializer.Deserialize<ResponseType<List<Site>>>(response.Content,
@@ -30,10 +30,10 @@ namespace IISManager.Cli.Manager
                 });
             if (result is { IsSuccess: true })
             {
-                var table = new TablePrinter("Id", "Name", "Path", "Port", "Url", "State");
+                var table = new TablePrinter("Id", "Name", "PoolName", "Path", "Port", "Url", "State");
                 foreach (var site in result.Result)
                 {
-                    table.AddRow(site.Id, site.Name, site.Path, site.Port, site.Url, site.State);
+                    table.AddRow(site.Id, site.Name, site.AppPoolName, site.Path, site.Port, site.Url, site.State);
                 }
 
                 table.Print();
@@ -49,7 +49,7 @@ namespace IISManager.Cli.Manager
         {
             try
             {
-                var response = await HttpManager.Request(_host + ":" + _port, "/iis/" + id, Method.Get, null);
+                var response = await HttpManager.Request(_host + ":" + _port, "/iis/site/" + id, Method.Get, null);
                 if (!response.IsSuccessful) throw new Exception(response.ErrorMessage);
 
                 var result = JsonSerializer.Deserialize<ResponseType<Site>>(response.Content,
@@ -95,7 +95,7 @@ namespace IISManager.Cli.Manager
                 input.FilePath = zipFilePath;
 
                 var response =
-                    await HttpManager.CreateFromForm(_host + ":" + _port, "/iis", Method.Post, input);
+                    await HttpManager.CreateFromForm(_host + ":" + _port, "/iis/site", Method.Post, input);
                 if (!response.IsSuccessful) throw new Exception(response.ErrorMessage);
 
                 var result = JsonSerializer.Deserialize<ResponseType<Site>>(response.Content,
@@ -141,7 +141,7 @@ namespace IISManager.Cli.Manager
         {
             try
             {
-                await StopSite(new StopSiteInput() { Id = input.Id });
+                await StopPool(input.AppPoolName);
 
                 var zipFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, input.Id + ".zip");
                 if (File.Exists(zipFilePath))
@@ -154,38 +154,32 @@ namespace IISManager.Cli.Manager
 
                 var success = false;
 
-                while (!success)
-                {
-                    var response =
-                        await HttpManager.DeployFromForm(_host + ":" + _port, $"/iis/{input.Id}/deploy", Method.Post,
-                            input);
-                    if (!response.IsSuccessful) throw new Exception(response.ErrorMessage);
+                var response =
+                    await HttpManager.DeployFromForm(_host + ":" + _port, $"/iis/site/{input.Id}/deploy",
+                        Method.Post,
+                        input);
+                if (!response.IsSuccessful) throw new Exception(response.ErrorMessage);
 
-                    var result = JsonSerializer.Deserialize<ResponseType<Site>>(response.Content,
-                        new JsonSerializerOptions
-                        {
-                            PropertyNameCaseInsensitive = true
-                        });
-                    if (result is { IsSuccess: true })
+                var result = JsonSerializer.Deserialize<ResponseType<Site>>(response.Content,
+                    new JsonSerializerOptions
                     {
-                        success = true;
+                        PropertyNameCaseInsensitive = true
+                    });
+                if (result is { IsSuccess: true })
+                {
+                    success = true;
 
-                        var table = new TablePrinter("Id", "Name", "Path", "Port", "Url", "State");
-                        table.AddRow(result.Result.Id, result.Result.Name, result.Result.Path, result.Result.Port,
-                            result.Result.Url ?? "", result.Result.State ?? "");
-                        table.Print();
+                    var table = new TablePrinter("Id", "Name", "Path", "Port", "Url", "State");
+                    table.AddRow(result.Result.Id, result.Result.Name, result.Result.Path, result.Result.Port,
+                        result.Result.Url ?? "", result.Result.State ?? "");
+                    table.Print();
 
-                        if (File.Exists(zipFilePath))
-                        {
-                            File.Delete(zipFilePath);
-                        }
-
-                        await StartSite(new StartSiteInput() { Id = input.Id });
-
-                        break;
+                    if (File.Exists(zipFilePath))
+                    {
+                        File.Delete(zipFilePath);
                     }
 
-                    Thread.Sleep(100);
+                    await StartPool(input.AppPoolName);
                 }
 
                 return null;
@@ -202,7 +196,7 @@ namespace IISManager.Cli.Manager
             try
             {
                 var response =
-                    await HttpManager.Request(_host + ":" + _port, $"/iis/{startSiteInput.Id}/start", Method.Post,
+                    await HttpManager.Request(_host + ":" + _port, $"/iis/site/{startSiteInput.Id}/start", Method.Post,
                         startSiteInput);
                 if (!response.IsSuccessful) throw new Exception(response.ErrorMessage);
 
@@ -240,7 +234,7 @@ namespace IISManager.Cli.Manager
             try
             {
                 var response =
-                    await HttpManager.Request(_host + ":" + _port, $"/iis/{stopSiteInput.Id}/stop", Method.Post,
+                    await HttpManager.Request(_host + ":" + _port, $"/iis/site/{stopSiteInput.Id}/stop", Method.Post,
                         stopSiteInput);
                 if (!response.IsSuccessful) throw new Exception(response.ErrorMessage);
 
@@ -255,6 +249,73 @@ namespace IISManager.Cli.Manager
                     table.AddRow(result.Result.Id, result.Result.Name, result.Result.Path, result.Result.Port,
                         result.Result.Url, result.Result.State);
                     table.Print();
+
+                    return result.Result;
+                }
+
+                if (result is { IsSuccess: false })
+                {
+                    throw new Exception(result.Error.Message);
+                }
+
+                throw new Exception(response.ErrorMessage);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return null;
+            }
+        }
+
+        public async Task<Pool> StopPool(string name)
+        {
+            try
+            {
+                var response =
+                    await HttpManager.Request(_host + ":" + _port, $"/iis/pool/{name}/stop", Method.Post, null);
+                if (!response.IsSuccessful) throw new Exception(response.ErrorMessage);
+
+                var result = JsonSerializer.Deserialize<ResponseType<Pool>>(response.Content,
+                    new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+                if (result is { IsSuccess: true })
+                {
+                    Console.WriteLine($"Stopped {name} App Pool.");
+                    return result.Result;
+                }
+
+                if (result is { IsSuccess: false })
+                {
+                    throw new Exception(result.Error.Message);
+                }
+
+                throw new Exception(response.ErrorMessage);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return null;
+            }
+        }
+
+        public async Task<Pool> StartPool(string name)
+        {
+            try
+            {
+                var response =
+                    await HttpManager.Request(_host + ":" + _port, $"/iis/pool/{name}/start", Method.Post, null);
+                if (!response.IsSuccessful) throw new Exception(response.ErrorMessage);
+
+                var result = JsonSerializer.Deserialize<ResponseType<Pool>>(response.Content,
+                    new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+                if (result is { IsSuccess: true })
+                {
+                    Console.WriteLine($"Started {name} App Pool.");
 
                     return result.Result;
                 }

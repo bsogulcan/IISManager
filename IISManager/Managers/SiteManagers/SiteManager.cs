@@ -118,11 +118,11 @@ public class SiteManager : ISiteManager
                     throw new Exception("Site not found! Id:" + input.Id);
                 }
 
-                if (site.State == ObjectState.Started)
-                {
-                    throw new Exception(
-                        "Current State is Started. Cannot deploy started sites, please stop it first!");
-                }
+                // if (site.State == ObjectState.Started)
+                // {
+                //     throw new Exception(
+                //         "Current State is Started. Cannot deploy started sites, please stop it first!");
+                // }
 
                 var sitePath = Environment.ExpandEnvironmentVariables(site.Applications.First().VirtualDirectories.First().PhysicalPath);
                 var publishFile = _fileManager.UploadFileAndGetFullPath(_publishesFilePath, input.File);

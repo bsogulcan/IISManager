@@ -1,4 +1,5 @@
-﻿using IISManager.Cli.Models.Dtos;
+﻿using IISManager.Cli.Models;
+using IISManager.Cli.Models.Dtos;
 using IISManagerCli.Enums;
 using Microsoft.Extensions.Configuration;
 using Sharprompt;
@@ -7,7 +8,7 @@ namespace IISManager.Cli;
 
 internal class Program(IConfiguration configuration, Manager.IISManager iisManager)
 {
-    private readonly IConfiguration _configuration = configuration;
+    private List<Site> _sites { get; set; }
 
     public static async Task Main()
     {
@@ -33,7 +34,7 @@ internal class Program(IConfiguration configuration, Manager.IISManager iisManag
             .Select(children => children.Key)
             .ToList();
 
-        return Prompt.Select("Select Profile", profiles.ToArray(), pageSize: 3);
+        return Prompt.Select("Select Server", profiles.ToArray(), pageSize: 3);
     }
 
     private static IISManager.Cli.Manager.IISManager CreateIISManager(IConfiguration configuration, string profile)
@@ -45,8 +46,8 @@ internal class Program(IConfiguration configuration, Manager.IISManager iisManag
 
     private async Task Run()
     {
-        await iisManager.GetList();
-
+        _sites = await iisManager.GetList();
+        
         while (true)
         {
             var processType = Prompt.Select<ProcessType>("Select Process");
@@ -90,7 +91,7 @@ internal class Program(IConfiguration configuration, Manager.IISManager iisManag
     private async Task HandleGetAllSites()
     {
         Console.Clear();
-        await iisManager.GetList();
+        _sites = await iisManager.GetList();
     }
 
     private async Task HandleCreateSite()
@@ -112,8 +113,10 @@ internal class Program(IConfiguration configuration, Manager.IISManager iisManag
         var input = new DeploySiteInput
         {
             Id = Prompt.Input<long>("Site Id"),
-            FilePath = Prompt.Input<string>("Publish Folder Path")
+            FilePath = Prompt.Input<string>("Publish Folder Path"),
         };
+
+        input.AppPoolName = _sites.First(x => x.Id == input.Id).AppPoolName;
         await iisManager.DeploySite(input);
     }
 

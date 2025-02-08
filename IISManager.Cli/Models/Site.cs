@@ -8,4 +8,5 @@ public class Site
     public int Port { get; set; }
     public string Url { get; set; }
     public string State { get; set; }
+    public string AppPoolName { get; set; }
 }
