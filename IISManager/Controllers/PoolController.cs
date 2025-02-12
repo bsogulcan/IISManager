@@ -7,10 +7,10 @@ namespace IISManager.Controllers;
 
 [ApiController]
 [Route("iis/pool")]
-public class PoolController : ControllerBase
+public class PoolController(ILogger<PoolController> logger) : ControllerBase
 {
     [HttpGet]
-    public Task<ResponseType<List<Pool>>> GetList()
+    public ActionResult<ResponseType<List<Pool>>> GetList()
     {
         var response = new ResponseType<List<Pool>>();
 
@@ -23,18 +23,19 @@ public class PoolController : ControllerBase
                 .ToList();
 
             response.Result = pools;
-            return Task.FromResult(response);
+            return Ok(response);
         }
         catch (Exception e)
         {
             response.IsSuccess = false;
             response.Error = new ErrorInfo(e);
-            return Task.FromResult(response);
+            logger.LogError(e, e.Message);
+            return StatusCode(500, response);
         }
     }
 
     [HttpGet("{name}")]
-    public Task<ResponseType<Pool>> Get(string name)
+    public ActionResult<ResponseType<Pool>> Get(string name)
     {
         var response = new ResponseType<Pool>();
 
@@ -45,19 +46,20 @@ public class PoolController : ControllerBase
             if (pool == null) throw new Exception("Pool not found! Name:" + name);
 
             response.Result = new Pool(pool);
-            return Task.FromResult(response);
+            return Ok(response);
         }
         catch (Exception e)
         {
             response.IsSuccess = false;
             response.Error = new ErrorInfo(e);
-            return Task.FromResult(response);
+            logger.LogError(e, e.Message);
+            return StatusCode(500, response);
         }
     }
 
 
     [HttpPost("{name}/stop")]
-    public Task<ResponseType<Pool>> Stop(string name)
+    public ActionResult<ResponseType<Pool>> Stop(string name)
     {
         var response = new ResponseType<Pool>();
 
@@ -71,18 +73,19 @@ public class PoolController : ControllerBase
             serverMgr.CommitChanges();
 
             response.Result = new Pool(pool);
-            return Task.FromResult(response);
+            return Ok(response);
         }
         catch (Exception e)
         {
             response.IsSuccess = false;
             response.Error = new ErrorInfo(e);
-            return Task.FromResult(response);
+            logger.LogError(e, e.Message);
+            return StatusCode(500, response);
         }
     }
 
     [HttpPost("{name}/start")]
-    public Task<ResponseType<Pool>> Start(string name)
+    public ActionResult<ResponseType<Pool>> Start(string name)
     {
         var response = new ResponseType<Pool>();
 
@@ -96,18 +99,19 @@ public class PoolController : ControllerBase
             serverMgr.CommitChanges();
 
             response.Result = new Pool(pool);
-            return Task.FromResult(response);
+            return Ok(response);
         }
         catch (Exception e)
         {
             response.IsSuccess = false;
             response.Error = new ErrorInfo(e);
-            return Task.FromResult(response);
+            logger.LogError(e, e.Message);
+            return StatusCode(500, response);
         }
     }
 
     [HttpPost("{name}/recycle")]
-    public Task<ResponseType<Pool>> Recycle(string name)
+    public ActionResult<ResponseType<Pool>> Recycle(string name)
     {
         var response = new ResponseType<Pool>();
 
@@ -121,18 +125,19 @@ public class PoolController : ControllerBase
             serverMgr.CommitChanges();
 
             response.Result = new Pool(pool);
-            return Task.FromResult(response);
+            return Ok(response);
         }
         catch (Exception e)
         {
             response.IsSuccess = false;
             response.Error = new ErrorInfo(e);
-            return Task.FromResult(response);
+            logger.LogError(e, e.Message);
+            return StatusCode(500, response);
         }
     }
 
     [HttpDelete("{name}")]
-    public Task<ResponseType<Pool>> Delete(string name)
+    public ActionResult<ResponseType<Pool>> Delete(string name)
     {
         var response = new ResponseType<Pool>();
 
@@ -146,13 +151,14 @@ public class PoolController : ControllerBase
             serverMgr.CommitChanges();
 
             response.Result = new Pool(pool);
-            return Task.FromResult(response);
+            return Ok(response);
         }
         catch (Exception e)
         {
             response.IsSuccess = false;
             response.Error = new ErrorInfo(e);
-            return Task.FromResult(response);
+            logger.LogError(e, e.Message);
+            return StatusCode(500, response);
         }
     }
 }

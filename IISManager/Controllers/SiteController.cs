@@ -9,10 +9,12 @@ namespace IISManager.Controllers;
 
 [ApiController]
 [Route("iis/site")]
-public class SiteController(ISiteManager siteManager) : ControllerBase
+public class SiteController(
+    ISiteManager siteManager,
+    ILogger<PoolController> logger) : ControllerBase
 {
     [HttpGet]
-    public ResponseType<List<Site>> GetAllSitesAsync()
+    public ActionResult<ResponseType<List<Site>>> GetAllSitesAsync()
     {
         var response = new ResponseType<List<Site>>();
 
@@ -25,18 +27,19 @@ public class SiteController(ISiteManager siteManager) : ControllerBase
                 .ToList();
 
             response.Result = sites;
-            return response;
+            return Ok(response);
         }
         catch (Exception e)
         {
             response.IsSuccess = false;
             response.Error = new ErrorInfo(e);
-            return response;
+            logger.LogError(e, e.Message);
+            return StatusCode(500, response);
         }
     }
 
     [HttpGet("{id}")]
-    public ResponseType<Site> GetAsync(long id)
+    public ActionResult<ResponseType<Site>> GetAsync(long id)
     {
         var response = new ResponseType<Site>();
         try
@@ -46,18 +49,19 @@ public class SiteController(ISiteManager siteManager) : ControllerBase
             if (iisSite == null) throw new Exception("Site not found! Id:" + id);
 
             response.Result = new Site(iisSite);
-            return response;
+            return Ok(response);
         }
         catch (Exception e)
         {
             response.IsSuccess = false;
             response.Error = new ErrorInfo(e);
-            return response;
+            logger.LogError(e, e.Message);
+            return StatusCode(500, response);
         }
     }
 
     [HttpPost]
-    public ResponseType<Site> CreateAsync(IFormFile file, [FromForm] string name, [FromForm] int port,
+    public ActionResult<ResponseType<Site>> CreateAsync(IFormFile file, [FromForm] string name, [FromForm] int port,
         [FromForm] string bindingInformation)
     {
         var response = new ResponseType<Site>();
@@ -73,18 +77,20 @@ public class SiteController(ISiteManager siteManager) : ControllerBase
             };
 
             response.Result = siteManager.Create(createSiteInput);
-            return response;
+            return Ok(response);
+            
         }
         catch (Exception e)
         {
             response.IsSuccess = false;
             response.Error = new ErrorInfo(e);
-            return response;
+            logger.LogError(e, e.Message);
+            return StatusCode(500, response);
         }
     }
 
     [HttpPut("{id}")]
-    public ResponseType<Site> UpdateAsync(long id, UpdateSiteDto input)
+    public ActionResult<ResponseType<Site>> UpdateAsync(long id, UpdateSiteDto input)
     {
         var response = new ResponseType<Site>();
 
@@ -98,18 +104,19 @@ public class SiteController(ISiteManager siteManager) : ControllerBase
             };
 
             response.Result = siteManager.Update(updateSiteInput);
-            return response;
+            return Ok(response);
         }
         catch (Exception e)
         {
             response.IsSuccess = false;
             response.Error = new ErrorInfo(e);
-            return response;
+            logger.LogError(e, e.Message);
+            return StatusCode(500, response);
         }
     }
 
     [HttpPost("{id}/deploy")]
-    public ResponseType<Site> Deploy(long id, IFormFile file)
+    public ActionResult<ResponseType<Site>> Deploy(long id, IFormFile file)
     {
         var response = new ResponseType<Site>();
 
@@ -122,52 +129,52 @@ public class SiteController(ISiteManager siteManager) : ControllerBase
             };
 
             response.Result = siteManager.Deploy(updateSiteInput);
-            return response;
+            return Ok(response);
         }
         catch (Exception e)
         {
             response.IsSuccess = false;
             response.Error = new ErrorInfo(e);
-
-            return response;
+            logger.LogError(e, e.Message);
+            return StatusCode(500, response);
         }
     }
 
     [HttpPost("{id}/stop")]
-    public ResponseType<Site> Stop(long id)
+    public ActionResult<ResponseType<Site>> Stop(long id)
     {
         var response = new ResponseType<Site>();
 
         try
         {
             response.Result = siteManager.Stop(id);
-            return response;
+            return Ok(response);
         }
         catch (Exception e)
         {
             response.IsSuccess = false;
             response.Error = new ErrorInfo(e);
-
-            return response;
+            logger.LogError(e, e.Message);
+            return StatusCode(500, response);
         }
     }
 
     [HttpPost("{id}/start")]
-    public ResponseType<Site> Start(long id)
+    public ActionResult<ResponseType<Site>> Start(long id)
     {
         var response = new ResponseType<Site>();
 
         try
         {
             response.Result = siteManager.Start(id);
-            return response;
+            return Ok(response);
         }
         catch (Exception e)
         {
             response.IsSuccess = false;
             response.Error = new ErrorInfo(e);
-
-            return response;
+            logger.LogError(e, e.Message);
+            return StatusCode(500, response);
         }
     }
 }

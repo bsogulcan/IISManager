@@ -25,8 +25,17 @@ public class Site
         Path = Environment.ExpandEnvironmentVariables(site.Applications.First().VirtualDirectories.First()
             .PhysicalPath);
         Url = site.Bindings.First().BindingInformation;
-        Port = Convert.ToInt32(Url.Substring(Url.IndexOf(":") + 1).Replace(":", ""));
-
+        // Port = Convert.ToInt32(Url.Substring(Url.IndexOf(":") + 1).Replace(":", ""));
+        
+        if (int.TryParse(Url.Split(':')[1], out var port))
+        {
+            Port = port;
+        }
+        else
+        {
+            Port = -1;
+        }
+        
         try
         {
             State = StateConverter.GetString(site.State);

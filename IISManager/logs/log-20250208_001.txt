@@ -1,0 +1,35 @@
+2025-02-08 09:48:03.707 +03:00 [INF] Starting web application
+2025-02-08 09:48:04.187 +03:00 [INF] HTTP GET /swagger/index.html started - Request Body: 
+2025-02-08 09:48:04.250 +03:00 [INF] HTTP GET /swagger/index.html finished - Status Code: 200
+2025-02-08 09:48:04.334 +03:00 [INF] HTTP GET /swagger/favicon-32x32.png started - Request Body: 
+2025-02-08 09:48:04.340 +03:00 [INF] HTTP GET /swagger/favicon-32x32.png finished - Status Code: 200
+2025-02-08 09:48:04.352 +03:00 [INF] HTTP GET /swagger/v1/swagger.json started - Request Body: 
+2025-02-08 09:48:04.425 +03:00 [INF] HTTP GET /swagger/v1/swagger.json finished - Status Code: 200
+2025-02-08 09:48:08.010 +03:00 [INF] HTTP GET /swagger/index.html started - Request Body: 
+2025-02-08 09:48:08.014 +03:00 [INF] HTTP GET /swagger/index.html finished - Status Code: 200
+2025-02-08 09:48:08.078 +03:00 [INF] HTTP GET /swagger/favicon-32x32.png started - Request Body: 
+2025-02-08 09:48:08.083 +03:00 [INF] HTTP GET /swagger/favicon-32x32.png finished - Status Code: 200
+2025-02-08 09:48:08.099 +03:00 [INF] HTTP GET /swagger/v1/swagger.json started - Request Body: 
+2025-02-08 09:48:08.107 +03:00 [INF] HTTP GET /swagger/v1/swagger.json finished - Status Code: 200
+2025-02-08 09:48:14.727 +03:00 [INF] HTTP GET /iis/pool started - Request Body: 
+2025-02-08 09:48:14.736 +03:00 [WRN] Failed to determine the https port for redirect.
+2025-02-08 09:48:14.804 +03:00 [INF] HTTP GET /iis/pool finished - Status Code: 200
+2025-02-08 09:48:29.495 +03:00 [INF] HTTP GET /iis/pool/aasdasd started - Request Body: 
+2025-02-08 09:48:29.519 +03:00 [INF] HTTP GET /iis/pool/aasdasd finished - Status Code: 200
+2025-02-08 09:48:35.891 +03:00 [INF] HTTP GET /iis/site/4231321 started - Request Body: 
+2025-02-08 09:48:35.909 +03:00 [INF] HTTP GET /iis/site/4231321 finished - Status Code: 200
+2025-02-08 10:09:08.141 +03:00 [INF] Starting web application
+2025-02-08 10:09:08.725 +03:00 [INF] HTTP GET /swagger/index.html started
+2025-02-08 10:09:08.797 +03:00 [INF] HTTP GET /swagger/index.html finished - Status Code: 200
+2025-02-08 10:09:08.879 +03:00 [INF] HTTP GET /swagger/favicon-32x32.png started
+2025-02-08 10:09:08.886 +03:00 [INF] HTTP GET /swagger/favicon-32x32.png finished - Status Code: 200
+2025-02-08 10:09:08.900 +03:00 [INF] HTTP GET /swagger/v1/swagger.json started
+2025-02-08 10:09:08.972 +03:00 [INF] HTTP GET /swagger/v1/swagger.json finished - Status Code: 200
+2025-02-08 10:09:11.730 +03:00 [INF] HTTP GET /iis/pool started
+2025-02-08 10:09:11.737 +03:00 [WRN] Failed to determine the https port for redirect.
+2025-02-08 10:09:11.809 +03:00 [INF] HTTP GET /iis/pool finished - Status Code: 200
+2025-02-08 10:09:36.078 +03:00 [INF] HTTP GET /iis/pool started
+2025-02-08 10:09:36.083 +03:00 [ERR] test
+System.Exception: test
+   at IISManager.Controllers.PoolController.GetList()
+2025-02-08 10:09:36.091 +03:00 [INF] HTTP GET /iis/pool finished - Status Code: 500
